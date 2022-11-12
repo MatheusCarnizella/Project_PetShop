@@ -1,8 +1,9 @@
-﻿using System.Text.Json.Serialization;
+﻿using Project_PetShop.Interfaces;
+using System.Text.Json.Serialization;
 
 namespace Project_PetShop.Models
 {
-    public class Produto
+    public class Produto : IProduto
     {
         public int idProduto { get; set; }
         public string? nomeProduto { get; set; }
@@ -16,5 +17,12 @@ namespace Project_PetShop.Models
 
         [JsonIgnore]
         public Usuario? Usuario { get; set; }
+
+        List<Produto> IProduto.GetProdutos()
+        {
+            var produtos = new List<Produto>();
+            produtos.Add(new Produto { idProduto = idProduto, Id = Id });
+            return produtos;
+        }
     }
 }
