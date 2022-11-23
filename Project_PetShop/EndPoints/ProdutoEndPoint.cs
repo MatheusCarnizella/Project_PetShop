@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Project_PetShop.Context;
 using Project_PetShop.Models;
+using Project_PetShop.Repository;
 
 namespace Project_PetShop.EndPoints
 {
@@ -8,10 +9,10 @@ namespace Project_PetShop.EndPoints
     {
         public static void MapProdutoEndPoint(this WebApplication app)
         {
-            app.MapPost("/Produto/cadastrarProduto", async (Produto produto, AppDbContext context) =>
+            app.MapPost("/Produto/cadastrarProduto", async(Produto produto, IUnityOfWork context) =>
             {
-                context.Produtos.Add(produto);
-                await context.SaveChangesAsync();
+                await context.ProdutoRepository.Add(produto);
+                context.Save();
 
                 return Results.Created($"/cadastrarProduto/{produto.idProduto}", produto);
             })
@@ -19,64 +20,39 @@ namespace Project_PetShop.EndPoints
                 .WithName("CriarUmNovoProduto")
                 .WithTags("Produto");
 
-            app.MapGet("/Produto/pegarProdutos", async (AppDbContext context) =>
-            await context.Produtos.ToListAsync())
+            app.MapGet("/Produto/pegarProduto", async (IUnityOfWork context) =>
+            await context.ProdutoRepository.GetItem())
                 .Produces<List<Produto>>(StatusCodes.Status200OK)
                 .WithTags("Produto");
 
-            app.MapGet("/Produto/pegarProduto/{id:int}", async (int id, AppDbContext context) =>
+            app.MapGet("/Produto/pegarProduto/{id:int}", async (int id, IUnityOfWork context) =>
             {
-                return await context.Produtos.FindAsync(id)
+                return await context.ProdutoRepository.GetItemById(p => p.idProduto == id)
                     is Produto produto
                     ? Results.Ok(produto)
                     : Results.NotFound("Produto não encontrado");
+
             })
                 .Produces<List<Produto>>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status404NotFound)
                 .WithTags("Produto");
-
-            app.MapGet("/Produto/pegarProduto/{status}", (string status, AppDbContext context) =>
+            
+            app.MapPut("/Produto/atualizarProduto/{id:int}", async (int id, Produto produto, IUnityOfWork context) =>
             {
-                var produtoStatus = context.Produtos.Where(x => x.nomeProduto
-                                   .ToLower().Contains(status.ToLower()))
-                                   .ToList();
+                var produtoContext = context.ProdutoRepository.Update(produto);
 
-                return produtoStatus.Count > 0
-                        ? Results.Ok(produtoStatus)
-                        : Results.NotFound(Array.Empty<Produto>());
-
-            })
-                .Produces<Produto>(StatusCodes.Status200OK)
-                .WithName("ProdutoPorUmStatus")
-                .WithTags("Produto");
-
-            app.MapGet("/Produto/pegarPerodutosporPagina", async (int nPagina, int tamanhoPagina, AppDbContext context) =>
-            {
-                await context.Produtos
-                .Skip((nPagina - 1) * tamanhoPagina)
-                .Take(tamanhoPagina)
-                .ToListAsync();
-            })
-                .Produces<Produto>(StatusCodes.Status200OK)
-                .WithName("ProdutoPorUmaPagina")
-                .WithTags("Produto");
-
-            app.MapPut("/Produto/atualizarProduto/{id:int}", async (int idproduto, Produto produto, AppDbContext context) =>
-            {
-                var produtoContext = context.Produtos.SingleOrDefault(a => a.idProduto == idproduto);
+                if (id != produto.idProduto)
+                {
+                    return Results.BadRequest("Produto não encontrado");
+                }
 
                 if (produtoContext == null)
                 {
                     return Results.NotFound("Produto não encontrado");
                 }
 
-                produtoContext.nomeProduto = produto.nomeProduto;
-                produtoContext.produtoDescricao = produto.produtoDescricao;
-                produtoContext.urlImagem = produto.urlImagem;
-                produtoContext.Valor = produto.Valor;
-                produtoContext.Quantidade = produto.Quantidade;
-
-                await context.SaveChangesAsync();
+                context.Save();
+                await produtoContext;
                 return Results.Ok(produtoContext);
             })
                 .Produces<Produto>(StatusCodes.Status200OK)
@@ -84,17 +60,17 @@ namespace Project_PetShop.EndPoints
                 .WithName("AtualizarUmProduto")
                 .WithTags("Produto");
 
-            app.MapDelete("/Produtos/deletarProdutos/{id:int}", async (int id, AppDbContext context) =>
+            app.MapDelete("/Produtos/deletarProdutos/{id:int}", async (int id, IUnityOfWork context) =>
             {
-                var produtoContext = await context.Produtos.FindAsync(id);
+                var produtoContext = await context.ProdutoRepository.GetItemById(p => p.idProduto == id);
 
                 if (produtoContext is null)
                 {
                     return Results.NotFound("Produto não encontrado");
                 }
 
-                context.Produtos.Remove(produtoContext);
-                await context.SaveChangesAsync();
+                await context.ProdutoRepository.Delete(produtoContext);
+                context.Save();
                 return Results.Ok(produtoContext);
             })
                 .Produces<Produto>(StatusCodes.Status200OK)

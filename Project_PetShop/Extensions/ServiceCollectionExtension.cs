@@ -28,7 +28,7 @@ namespace Project_PetShop.Extensions
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(connectionString));           
+                options.UseSqlServer(connectionString));
 
             return builder;
         }

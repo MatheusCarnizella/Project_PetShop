@@ -1,5 +1,4 @@
-﻿using Project_PetShop.Interfaces;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Project_PetShop.Models
 {
@@ -15,17 +14,6 @@ namespace Project_PetShop.Models
 
         [JsonIgnore]
         public ICollection<Produto>? Produtos { get; set; }
-
-        private readonly IProduto _produto;
-
-        public Usuario(IProduto produto)
-        {
-            this._produto = produto;
-        }
-
-        public List<Produto> PegarProdutos()
-        {
-            return _produto.GetProdutos();
-        }
+               
     }
 }
