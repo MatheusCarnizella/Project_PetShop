@@ -11,8 +11,8 @@ namespace Project_PetShop.EndPoints
         {
             app.MapPost("/Produto/cadastrarProduto", async(Produto produto, IUnityOfWork context) =>
             {
-                await context.ProdutoRepository.Add(produto);
-                context.Save();
+                context.ProdutoRepository.Add(produto);
+                await context.Save();
 
                 return Results.Created($"/cadastrarProduto/{produto.idProduto}", produto);
             })
@@ -21,7 +21,7 @@ namespace Project_PetShop.EndPoints
                 .WithTags("Produto");
 
             app.MapGet("/Produto/pegarProduto", async (IUnityOfWork context) =>
-            await context.ProdutoRepository.GetItem())
+            await context.ProdutoRepository.GetItem().ToListAsync())
                 .Produces<List<Produto>>(StatusCodes.Status200OK)
                 .WithTags("Produto");
 
@@ -46,13 +46,12 @@ namespace Project_PetShop.EndPoints
                     return Results.BadRequest("Produto não encontrado");
                 }
 
-                if (produtoContext == null)
+                if (produtoContext is null)
                 {
                     return Results.NotFound("Produto não encontrado");
                 }
 
-                context.Save();
-                await produtoContext;
+                await context.Save();
                 return Results.Ok(produtoContext);
             })
                 .Produces<Produto>(StatusCodes.Status200OK)
@@ -69,8 +68,8 @@ namespace Project_PetShop.EndPoints
                     return Results.NotFound("Produto não encontrado");
                 }
 
-                await context.ProdutoRepository.Delete(produtoContext);
-                context.Save();
+                context.ProdutoRepository.Delete(produtoContext);
+                await context.Save();
                 return Results.Ok(produtoContext);
             })
                 .Produces<Produto>(StatusCodes.Status200OK)

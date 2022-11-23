@@ -11,15 +11,15 @@ namespace Project_PetShop.EndPoints
         {
             app.MapPost("/Usuario/cadastrarUsuario", async (Usuario usuario, IUnityOfWork context) =>
             {
-                await context.UsuarioRepository.Add(usuario);
-                context.Save();
+                context.UsuarioRepository.Add(usuario);
+                await context.Save();
 
                 return Results.Created($"/cadastrarUsuario/{usuario.Id}", usuario);
             })
                 .WithTags("Usuario");
 
             app.MapGet("/Usuario/pegarUsuarios", async (IUnityOfWork context) =>
-            await context.UsuarioRepository.GetItem())
+            await context.UsuarioRepository.GetItem().ToListAsync())
                 .WithTags("Usuario");
 
             app.MapGet("/Usuario/pegarUsuario/{id:int}", async (int id, IUnityOfWork context) =>
@@ -58,8 +58,7 @@ namespace Project_PetShop.EndPoints
                     return Results.NotFound("Id não encontrado");
                 }
 
-                context.Save();
-                await usuarioContext;
+                await context.Save();
                 return Results.Ok(usuarioContext);
             })
                 .WithTags("Usuario");
@@ -73,8 +72,8 @@ namespace Project_PetShop.EndPoints
                     return Results.NotFound("Usuario não encontrado");
                 }
 
-                await context.UsuarioRepository.Delete(usuario);
-                context.Save();
+                context.UsuarioRepository.Delete(usuario);
+                await context.Save();
                 return Results.NoContent();
             })
                 .WithTags("Usuario");

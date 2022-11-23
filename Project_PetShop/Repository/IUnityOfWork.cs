@@ -5,6 +5,6 @@
         IProdutoRepository ProdutoRepository { get; }
         IUsuarioRepository UsuarioRepository { get; }
 
-        void Save();
+        Task Save();
     }
 }

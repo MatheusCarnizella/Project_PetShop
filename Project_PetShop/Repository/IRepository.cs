@@ -4,10 +4,10 @@ namespace Project_PetShop.Repository
 {
     public interface IRepository<T>
     {
-        Task <IQueryable<T>> GetItem();
+        IQueryable<T> GetItem();
         Task <T> GetItemById(Expression<Func<T, bool>> predicate);
-        Task Add(T entity);
+        void Add(T entity);
         Task Update(T enity);
-        Task Delete(T entity);
+        void Delete(T entity);
     }
 }
