@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Project_PetShop.Auth;
 using Project_PetShop.Context;
 using Project_PetShop.Models;
 using Project_PetShop.Repository;
@@ -10,11 +13,33 @@ namespace Project_PetShop.EndPoints
         public static void MapUsuarioEndPoint(this WebApplication app)
         {
             app.MapPost("/Usuario/cadastrarUsuario", async (Usuario usuario, IUnityOfWork context) =>
-            {
+            {              
                 context.UsuarioRepository.Add(usuario);
                 await context.Save();
 
                 return Results.Created($"/cadastrarUsuario/{usuario.Id}", usuario);
+
+            })
+                .WithTags("Usuario");
+
+            app.MapPost("/Usuario/Login", [AllowAnonymous](Usuario usuario, ITokenService ts) =>
+            {
+                if (ts == null)
+                {
+                    return Results.NotFound("Usuario sem cadastro");
+                }
+                if(usuario.userName == usuario.userName && usuario.Email == usuario.Email
+                && usuario.Password == usuario.Password)
+                {
+                    var tstring = ts.GetToken(app.Configuration["Jwt:Key"],
+                        app.Configuration["Jwt:Issuer"],
+                        app.Configuration["Jwt:Audience"], usuario);
+                    return Results.Ok(new { token = tstring });
+                }
+                else
+                {
+                    return Results.BadRequest("Login invalido");
+                }
             })
                 .WithTags("Usuario");
 
@@ -31,7 +56,7 @@ namespace Project_PetShop.EndPoints
             })
                 .WithTags("Usuario");
 
-            app.MapGet("/Usuario/pegarUsuario/{username}", (string username, AppDbContext context) =>
+            app.MapGet("/Usuario/pegarUsuario/{username}", async (string username, AppDbContext context) =>
             {
                 var usuarioNome = context.Usuarios.Where(x => x.userName
                                    .ToLower().Contains(username.ToLower()))

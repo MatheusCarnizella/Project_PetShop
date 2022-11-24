@@ -18,12 +18,14 @@ namespace Project_PetShop.EndPoints
             })
                 .Produces<Produto>(StatusCodes.Status201Created)
                 .WithName("CriarUmNovoProduto")
-                .WithTags("Produto");
+                .WithTags("Produto")
+                .RequireAuthorization();
 
             app.MapGet("/Produto/pegarProduto", async (IUnityOfWork context) =>
             await context.ProdutoRepository.GetItem().ToListAsync())
                 .Produces<List<Produto>>(StatusCodes.Status200OK)
-                .WithTags("Produto");
+                .WithTags("Produto")
+                .RequireAuthorization();
 
             app.MapGet("/Produto/pegarProduto/{id:int}", async (int id, IUnityOfWork context) =>
             {
@@ -35,7 +37,8 @@ namespace Project_PetShop.EndPoints
             })
                 .Produces<List<Produto>>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status404NotFound)
-                .WithTags("Produto");
+                .WithTags("Produto")
+                .RequireAuthorization();
             
             app.MapPut("/Produto/atualizarProduto/{id:int}", async (int id, Produto produto, IUnityOfWork context) =>
             {
@@ -57,7 +60,8 @@ namespace Project_PetShop.EndPoints
                 .Produces<Produto>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status404NotFound)
                 .WithName("AtualizarUmProduto")
-                .WithTags("Produto");
+                .WithTags("Produto")
+                .RequireAuthorization();
 
             app.MapDelete("/Produtos/deletarProdutos/{id:int}", async (int id, IUnityOfWork context) =>
             {
@@ -75,7 +79,8 @@ namespace Project_PetShop.EndPoints
                 .Produces<Produto>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status404NotFound)
                 .WithName("DeletarUmProduto")
-                .WithTags("Produto");
+                .WithTags("Produto")
+                .RequireAuthorization();
         }
     }
 }

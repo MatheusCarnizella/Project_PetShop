@@ -1,8 +1,5 @@
-using Microsoft.EntityFrameworkCore;
-using Project_PetShop.Context;
 using Project_PetShop.EndPoints;
 using Project_PetShop.Extensions;
-using Project_PetShop.Models;
 using Project_PetShop.Repository;
 using Project_PetShop.Repository.Implementations;
 
@@ -27,5 +24,8 @@ var enviroment = app.Environment;
 app.UseExceptionHandling(enviroment)
    .UseSwaggerEndpoints()
    .UseAppCors();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();
